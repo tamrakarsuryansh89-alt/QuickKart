@@ -1,5 +1,4 @@
 
-
 package com.quickkart.controller;
 
 import com.quickkart.model.Product;
@@ -35,6 +34,16 @@ public class ProductController {
     @PostMapping
     public Product addProduct(@RequestBody Product product) {
         return productService.addProduct(product);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable String id,
+            @RequestBody Product product) {
+
+        return productService.updateProduct(id, product)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

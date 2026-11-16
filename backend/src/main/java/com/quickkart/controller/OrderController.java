@@ -7,6 +7,7 @@ import com.quickkart.service.OrderService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,40 +25,55 @@ public class OrderController {
     // Create new order
     @PostMapping
     public ResponseEntity<Order> createOrder(
-            @RequestBody OrderRequest request) {
+            @RequestBody OrderRequest request,
+            Authentication authentication) {
 
-        Order savedOrder = orderService.createOrder(request);
+        Order savedOrder = orderService.createOrder(
+                request,
+                authentication.getName()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(savedOrder);
     }
 
-    // Get all orders
+    // Get logged-in user's orders
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
+    public ResponseEntity<List<Order>> getAllOrders(
+            Authentication authentication) {
 
-        List<Order> orders = orderService.getAllOrders();
+        List<Order> orders = orderService.getAllOrders(
+                authentication.getName()
+        );
 
         return ResponseEntity.ok(orders);
     }
 
-    // Get order by ID
+    // Get order by ID, only for its owner
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(
-            @PathVariable String id) {
+            @PathVariable String id,
+            Authentication authentication) {
 
-        Order order = orderService.getOrderById(id);
+        Order order = orderService.getOrderById(
+                id,
+                authentication.getName()
+        );
 
         return ResponseEntity.ok(order);
     }
 
-    // Cancel order
+    // Cancel order, only by its owner
     @PutMapping("/{id}/cancel")
     public ResponseEntity<Order> cancelOrder(
-            @PathVariable String id) {
+            @PathVariable String id,
+            Authentication authentication) {
 
-        Order cancelledOrder = orderService.cancelOrder(id);
+        Order cancelledOrder = orderService.cancelOrder(
+                id,
+                authentication.getName()
+        );
 
         return ResponseEntity.ok(cancelledOrder);
     }

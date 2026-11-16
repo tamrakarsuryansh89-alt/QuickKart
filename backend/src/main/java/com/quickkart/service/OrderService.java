@@ -6,34 +6,65 @@ import com.quickkart.dto.OrderItemRequest;
 import com.quickkart.model.Order;
 import com.quickkart.model.OrderItem;
 import com.quickkart.model.Product;
+import com.quickkart.model.User;
 import com.quickkart.repository.OrderRepository;
 import com.quickkart.repository.ProductRepository;
+import com.quickkart.repository.UserRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public OrderService(OrderRepository orderRepository,
-                        ProductRepository productRepository) {
+    private static final Map<String, Set<String>> ALLOWED_TRANSITIONS =
+            Map.of(
+                "PLACED", Set.of("CONFIRMED", "CANCELLED"),
+                "CONFIRMED", Set.of("PROCESSING", "CANCELLED"),
+                "PROCESSING", Set.of("OUT_FOR_DELIVERY", "CANCELLED"),
+                "OUT_FOR_DELIVERY", Set.of("DELIVERED"),
+                "DELIVERED", Set.of(),
+                "CANCELLED", Set.of()
+            );
+
+    public OrderService(
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            UserRepository userRepository) {
+
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
+    }
+
+    private User getAuthenticatedUser(String email) {
+
+        return userRepository.findByEmail(email.toLowerCase())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
     }
 
     // Create new order
-    public Order createOrder(OrderRequest request) {
+    public Order createOrder(OrderRequest request, String email) {
 
-        // 1. Validate customer details
         if (request == null) {
-            throw new IllegalArgumentException("Order details are required");
+            throw new IllegalArgumentException("Order request cannot be empty");
         }
+
+        User user = getAuthenticatedUser(email);
 
         if (request.getCustomer() == null ||
                 request.getCustomer().isBlank()) {
@@ -47,7 +78,7 @@ public class OrderService {
 
         if (request.getAddress() == null ||
                 request.getAddress().isBlank()) {
-            throw new IllegalArgumentException("Delivery address is required");
+            throw new IllegalArgumentException("Address is required");
         }
 
         if (request.getPincode() == null ||
@@ -55,12 +86,10 @@ public class OrderService {
             throw new IllegalArgumentException("Enter a valid 6-digit pincode");
         }
 
-        if (request.getItems() == null ||
-                request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one product");
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
         }
 
-        // 2. Prepare order items
         List<OrderItem> orderItems = new ArrayList<>();
 
         double total = 0;
@@ -71,23 +100,21 @@ public class OrderService {
             if (itemRequest == null ||
                     itemRequest.getProductId() == null ||
                     itemRequest.getProductId().isBlank()) {
-                throw new IllegalArgumentException("Invalid product details");
+                throw new IllegalArgumentException("Product ID is required");
             }
 
             int quantity = itemRequest.getQuantity();
 
-            if (quantity <= 0 || quantity > 100) {
-                throw new IllegalArgumentException("Quantity must be between 1 and 100");
+            if (quantity < 1 || quantity > 100) {
+                throw new IllegalArgumentException(
+                        "Quantity must be between 1 and 100");
             }
 
-            // 3. Get original product from MongoDB
             Product product = productRepository
                     .findById(itemRequest.getProductId())
                     .orElseThrow(() ->
-                            new IllegalArgumentException("Product not found: "
-                                    + itemRequest.getProductId()));
+                            new IllegalArgumentException("Product not found"));
 
-            // 4. Calculate subtotal using database price
             double price = product.getPrice();
             double subtotal = price * quantity;
 
@@ -105,57 +132,159 @@ public class OrderService {
             itemCount += quantity;
         }
 
-        // 5. Create complete order
         Order order = new Order();
 
-        order.setCustomer(request.getCustomer().trim());
+        order.setCustomer(request.getCustomer());
+        order.setUserId(user.getId());
         order.setPhone(request.getPhone());
-        order.setAddress(request.getAddress().trim());
+        order.setAddress(request.getAddress());
         order.setPincode(request.getPincode());
-
         order.setItems(orderItems);
         order.setTotal(total);
         order.setItemCount(itemCount);
         order.setStatus("PLACED");
         order.setCreatedAt(Instant.now());
 
-        // 6. Save order in MongoDB
         return orderRepository.save(order);
     }
 
-    // Get order by ID
-    public Order getOrderById(String id) {
+    // Customer: Get own orders
+    public List<Order> getAllOrders(String email) {
 
-        return orderRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Order not found: " + id));
+        User user = getAuthenticatedUser(email);
+
+        return orderRepository.findByUserId(user.getId());
     }
 
-    // Get all orders
-    public List<Order> getAllOrders() {
+    // Customer: Get specific own order
+    public Order getOrderById(String id, String email) {
+
+        User user = getAuthenticatedUser(email);
+
+        return orderRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Order not found"));
+    }
+
+    // Customer: Cancel only PLACED orders
+    public Order cancelOrder(String id, String email) {
+
+        User user = getAuthenticatedUser(email);
+
+        Order order = orderRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Order not found"));
+
+        if (!"PLACED".equals(order.getStatus())) {
+            throw new IllegalArgumentException(
+                    "Only PLACED orders can be cancelled by customers");
+        }
+
+        order.setStatus("CANCELLED");
+
+        return orderRepository.save(order);
+    }
+
+    // Admin: Get all orders
+    public List<Order> getAllOrdersForAdmin() {
 
         return orderRepository.findAll();
     }
 
-    // Cancel existing order
-    public Order cancelOrder(String id) {
+    // Admin: Get orders by status
+    public List<Order> getOrdersByStatusForAdmin(String status) {
 
-        // 1. Find order in MongoDB
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Order not found: " + id));
-
-        // 2. Check whether order can be cancelled
-        if (!"PLACED".equalsIgnoreCase(order.getStatus())) {
-            throw new IllegalArgumentException(
-                    "Only PLACED orders can be cancelled"
-            );
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Order status is required");
         }
 
-        // 3. Update order status
-        order.setStatus("CANCELLED");
+        String normalizedStatus = status.trim().toUpperCase();
 
-        // 4. Save updated order in MongoDB
+        if (!ALLOWED_TRANSITIONS.containsKey(normalizedStatus)) {
+            throw new IllegalArgumentException(
+                    "Invalid order status: " + normalizedStatus);
+        }
+
+        return orderRepository.findByStatus(normalizedStatus);
+    }
+
+    // Admin: Search orders with pagination and newest-first sorting
+    public Page<Order> searchOrdersForAdmin(
+            String customer,
+            int page,
+            int size) {
+
+        if (page < 0) {
+            throw new IllegalArgumentException(
+                    "Page number cannot be negative");
+        }
+
+        if (size < 1 || size > 100) {
+            throw new IllegalArgumentException(
+                    "Page size must be between 1 and 100");
+        }
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        if (customer == null || customer.isBlank()) {
+            return orderRepository.findAll(pageable);
+        }
+
+        return orderRepository.findByCustomerContainingIgnoreCase(
+                customer.trim(),
+                pageable
+        );
+    }
+
+    // Admin: Get a specific order
+    public Order getOrderByIdForAdmin(String id) {
+
+        return orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Order not found"));
+    }
+
+    // Admin: Update order status
+    public Order updateOrderStatus(String id, String newStatus) {
+
+        if (newStatus == null || newStatus.isBlank()) {
+            throw new IllegalArgumentException("Order status is required");
+        }
+
+        String normalizedStatus = newStatus.trim().toUpperCase();
+
+        if (!ALLOWED_TRANSITIONS.containsKey(normalizedStatus)) {
+            throw new IllegalArgumentException(
+                    "Invalid order status: " + normalizedStatus);
+        }
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Order not found"));
+
+        String currentStatus = order.getStatus();
+
+        if (currentStatus == null ||
+                !ALLOWED_TRANSITIONS.containsKey(currentStatus)) {
+            throw new IllegalArgumentException(
+                    "Current order status is invalid");
+        }
+
+        Set<String> allowedNextStatuses =
+                ALLOWED_TRANSITIONS.get(currentStatus);
+
+        if (!allowedNextStatuses.contains(normalizedStatus)) {
+            throw new IllegalArgumentException(
+                    "Cannot change order status from "
+                    + currentStatus + " to " + normalizedStatus);
+        }
+
+        order.setStatus(normalizedStatus);
+
         return orderRepository.save(order);
     }
 }

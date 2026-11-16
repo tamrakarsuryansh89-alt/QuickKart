@@ -5,6 +5,7 @@ import com.quickkart.model.Product;
 import com.quickkart.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,21 @@ public class ProductService {
 
     public Optional<Product> getProductById(String id) {
         return productRepository.findById(id);
+    }
+
+    public Optional<Product> updateProduct(String id, Product updatedProduct) {
+
+        return productRepository.findById(id).map(existingProduct -> {
+
+            existingProduct.setName(updatedProduct.getName());
+            existingProduct.setDesc(updatedProduct.getDesc());
+            existingProduct.setPrice(updatedProduct.getPrice());
+            existingProduct.setCategory(updatedProduct.getCategory());
+            existingProduct.setIcon(updatedProduct.getIcon());
+            existingProduct.setTime(updatedProduct.getTime());
+
+            return productRepository.save(existingProduct);
+        });
     }
 
     public void deleteProduct(String id) {

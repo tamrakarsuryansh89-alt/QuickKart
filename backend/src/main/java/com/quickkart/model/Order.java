@@ -14,6 +14,7 @@ public class Order {
     private String id;
 
     private String customer;
+    private String userId;
     private String phone;
     private String address;
     private String pincode;
@@ -42,6 +43,14 @@ public class Order {
 
     public void setCustomer(String customer) {
         this.customer = customer;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getPhone() {
