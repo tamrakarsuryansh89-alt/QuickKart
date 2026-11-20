@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F7FBFE] text-slate-800 antialiased font-sans min-h-screen selection:bg-sky-200 selection:text-sky-900;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b8e3f5;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #009CD4;
+}
+
+.transition-card {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.transition-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px -6px rgba(0, 156, 212, 0.13), 0 2px 8px -2px rgba(250, 121, 197, 0.07);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+.animate-fadeIn      { animation: fadeIn      0.15s ease-out          forwards; }
+.animate-slideInRight{ animation: slideInRight 0.3s  cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-scaleIn     { animation: scaleIn     0.2s  cubic-bezier(0.16,1,0.3,1) forwards; }
+
+.hover\:bg-white\/8:hover  { background-color: rgba(255,255,255,0.08); }
+.border-white\/12          { border-color:      rgba(255,255,255,0.12); }
+.bg-white\/5               { background-color: rgba(255,255,255,0.05); }
+.bg-white\/10              { background-color: rgba(255,255,255,0.10); }
+
+.text-brand-gradient {
+  background: linear-gradient(135deg, #009CD4 0%, #FA79C5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-brand-gradient {
+  background: linear-gradient(135deg, #009CD4 0%, #FA79C5 100%);
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+.btn-brand-gradient:hover {
+  opacity: 0.9;
+  box-shadow: 0 6px 20px -4px rgba(0,156,212,0.45);
+}
+
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.transition-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.transition-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hover\:bg-white\/8:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.border-white\/12 {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+button[aria-current="page"] {
+  font-weight: 600;
+}
