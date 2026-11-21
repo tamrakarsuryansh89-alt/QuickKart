@@ -100,3 +100,129 @@ h2 { margin-bottom: 16px; }
 .tone-calculators { background: #e1f5ea; color: #17803d; }
 .tone-geometry { background: #fff1dc; color: #a45d00; }
 .tone-exam-gear { background: #fde6ea; color: #b02a47; }
+
+/* My Orders Page */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.orders-link {
+  text-decoration: none;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: #eef0f8;
+  color: var(--ink);
+}
+
+.orders-link:hover {
+  background: var(--line);
+}
+
+.orders-page {
+  max-width: 1000px;
+  margin: 35px auto;
+  padding: 0 20px;
+}
+
+.orders-page h1 {
+  margin-bottom: 24px;
+  font-size: 28px;
+}
+
+.order-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(29, 42, 91, 0.06);
+}
+
+.order-card > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-card span {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.order-card p {
+  color: var(--ink-soft);
+  margin: 9px 0;
+}
+
+.order-card h4 {
+  margin: 18px 0 10px;
+}
+
+.order-card h3:last-child {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 18px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .orders-page {
+    margin: 24px auto;
+    padding: 0 14px;
+  }
+
+  .order-card {
+    padding: 16px;
+  }
+
+  .nav-links {
+    gap: 8px;
+  }
+
+  .orders-link {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+.view-details-link {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 9px 16px;
+  background: var(--ink);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.view-details-link:hover {
+  opacity: 0.85;
+}
+.cancel-order-btn {
+  margin-top: 20px;
+  padding: 11px 20px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-order-btn:hover {
+  background: #b91c1c;
+}
+
+.cancel-order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
