@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +7,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Package,
+  Boxes,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -36,6 +38,12 @@ const NAV_ITEMS = [
     to: '/products',
     icon: Package,
     description: 'Catalogue & inventory'
+  },
+  {
+    label: 'Inventory',
+    to: '/inventory',
+    icon: Boxes,
+    description: 'Stock & low-stock alerts'
   }
 ];
 
@@ -103,7 +111,7 @@ export default function Sidebar() {
             >
               {({ isActive }) => (
                 <>
-                  <div className={`relative shrink-0`}>
+                  <div className="relative shrink-0">
                     <Icon
                       className="w-[18px] h-[18px]"
                       style={isActive ? { color: '#009CD4' } : {}}

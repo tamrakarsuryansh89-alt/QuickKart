@@ -51,10 +51,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                 // Product read APIs are public
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/v1/products/**"
-                ).permitAll()
+               .requestMatchers(
+                   HttpMethod.GET,
+                   "/api/v1/products",
+                   "/api/v1/products/**"
+               ).permitAll()
 
                 // Product write APIs are Admin-only
                 .requestMatchers(
@@ -97,8 +98,8 @@ public class SecurityConfig {
         );
 
         config.setAllowedMethods(
-            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        );
+    List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+);
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

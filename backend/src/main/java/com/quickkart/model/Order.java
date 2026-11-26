@@ -26,6 +26,10 @@ public class Order {
     private String status;
     private Instant createdAt;
 
+    // True only when stock was reserved for this order.
+    // Older MongoDB orders default to false.
+    private boolean stockReserved = false;
+
     public Order() {
     }
 
@@ -115,5 +119,13 @@ public class Order {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isStockReserved() {
+        return stockReserved;
+    }
+
+    public void setStockReserved(boolean stockReserved) {
+        this.stockReserved = stockReserved;
     }
 }

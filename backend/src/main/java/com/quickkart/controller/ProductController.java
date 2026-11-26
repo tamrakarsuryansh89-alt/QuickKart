@@ -3,7 +3,7 @@ package com.quickkart.controller;
 
 import com.quickkart.model.Product;
 import com.quickkart.service.ProductService;
-
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,14 +32,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product addProduct(@RequestBody Product product) {
+    public Product addProduct(@Valid @RequestBody Product product) {
         return productService.addProduct(product);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(
             @PathVariable String id,
-            @RequestBody Product product) {
+            @Valid @RequestBody Product product) {
 
         return productService.updateProduct(id, product)
                 .map(ResponseEntity::ok)

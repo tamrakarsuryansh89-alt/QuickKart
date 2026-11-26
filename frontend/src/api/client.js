@@ -1,3 +1,4 @@
+
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 let authToken = null;
@@ -105,4 +106,12 @@ export const api = {
   listOrders: () => request('/admin/orders'),
   updateOrderStatus: (id, status) =>
     request(`/admin/orders/${encode(id)}/status`, { method: 'PUT', body: { status } }),
+
+  // Inventory APIs
+  listLowStockProducts: () => request('/admin/inventory/low-stock'),
+  updateInventory: (id, inventory) =>
+    request(`/admin/inventory/${encode(id)}`, {
+      method: 'PATCH',
+      body: inventory,
+    }),
 };
